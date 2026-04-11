@@ -1,0 +1,26 @@
+# --- SENSITIVE DATA (MUST IGNORE) ---
+.env
+.env.local
+.env.*.local
+
+# --- PYTHON SETTINGS ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.log
+
+# --- PROJECT SPECIFIC ---
+# These are your local "To-Do" lists and progress trackers
+processed_urls.txt
+*_links.json
+
+# --- NEXT.JS / NODE (PREP FOR PHASE 5) ---
+node_modules/
+.next/
+out/
+build/
+.DS_Store
+plan.txt
