@@ -67,7 +67,7 @@ def discover_characters_api(wiki_domain, category_name, universe_name):
         
     print(f"✅ Success! Saved {len(all_links)} characters to {output_file}")
 
-# --- EXECUTION ---
+# --- EXECUTION --- 
 discover_characters_api("jujutsu-kaisen.fandom.com", "Characters", "Jujutsu Kaisen")
 discover_characters_api("myheroacademia.fandom.com", "Characters", "My Hero Academia")
 discover_characters_api("kimetsu-no-yaiba.fandom.com", "Characters", "Demon Slayer")
