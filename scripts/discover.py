@@ -6,11 +6,11 @@ def discover_characters_api(wiki_domain, category_name, universe_name):
     """
     Uses the hidden MediaWiki API to fetch character lists without getting blocked by Cloudflare.
     """
-    # The API endpoint for all Fandom wikis
+    # The dynamic API endpoint for all Fandom wikis
     api_url = f"https://{wiki_domain}/api.php"
     all_links = []
     
-    # These parameters tell the API exactly what we want
+    # API setup parameters
     params = {
         "action": "query",
         "list": "categorymembers",
@@ -19,7 +19,7 @@ def discover_characters_api(wiki_domain, category_name, universe_name):
         "format": "json"
     }
     
-    # A polite User-Agent
+    # Neutral User-Agent
     headers = {
         'User-Agent': 'AnimeArbiterBot/1.0 (Learning Project)'
     }
@@ -27,12 +27,13 @@ def discover_characters_api(wiki_domain, category_name, universe_name):
     print(f"🚀 Starting API discovery for {universe_name}...")
     
     while True:
+        # call the API endpoint
         response = requests.get(api_url, headers=headers, params=params)
-        
+        # Check if the request was failed 
         if response.status_code != 200:
             print(f"Failed to retrieve API. Status Code: {response.status_code}")
             break
-            
+        # Parse JSON response
         data = response.json()
         
         # Dig into the JSON response to find the list of characters
