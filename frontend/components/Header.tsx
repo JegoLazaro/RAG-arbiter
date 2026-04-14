@@ -1,0 +1,46 @@
+import { ShieldAlert, Sun, Moon } from "lucide-react";
+
+interface HeaderProps {
+  isDarkMode: boolean;
+  toggleTheme: () => void;
+}
+
+export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
+  return (
+    <header className="p-5 border-b border-gray-200 dark:border-gray-800 bg-gray-300 dark:bg-gray-900 shadow-md flex items-center justify-between transition-colors duration-300">
+      <div className="flex items-center gap-3">
+        <ShieldAlert className="text-orange-700 w-8 h-8 dark:text-orange-500" />
+        <h1 className="text-2xl font-bold tracking-wider text-orange-700 dark:text-orange-500">
+          ANIME ARBITER
+        </h1>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <span className="hidden md:inline-block text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest border border-gray-800 dark:border-gray-700 px-3 py-1 rounded-full">
+          Powered by Fandom.wiki
+        </span>
+
+        {/* Dark Mode Toggle Button */}
+
+        <button
+          onClick={toggleTheme}
+          className="relative inline-flex h-8 w-16 items-center rounded-full bg-gray-300 dark:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+          aria-label="Toggle Dark Mode"
+        >
+          {/* The sliding "thumb" */}
+          <span
+            className={`inline-flex h-6 w-6 transform items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-md transition-transform duration-300 ${
+              isDarkMode ? "translate-x-9" : "translate-x-1"
+            }`}
+          >
+            {isDarkMode ? (
+              <Moon className="w-3.5 h-3.5 text-gray-200" />
+            ) : (
+              <Sun className="w-3.5 h-3.5 text-gray-300" />
+            )}
+          </span>
+        </button>
+      </div>
+    </header>
+  );
+}
