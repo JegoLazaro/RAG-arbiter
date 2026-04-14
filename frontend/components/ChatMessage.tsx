@@ -2,7 +2,12 @@ import { useState } from 'react';
 import { BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { Message } from '../types/chat';
 
-export default function ChatMessage({ message }: { message: Message }) {
+// interface ChatMessageProps {
+//   isDarkMode: boolean;
+//   toggleTheme: () => void;
+// }
+
+export default function ChatMessage({ message }: { message: Message } ) {
   const [isExpanded, setIsExpanded] = useState(false);
   const isUser = message.role === 'user';
 
@@ -10,7 +15,7 @@ export default function ChatMessage({ message }: { message: Message }) {
     <div className={`flex flex-col max-w-3xl ${isUser ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
       
       {/* The Message Bubble */}
-      <div className={`p-4 rounded-2xl ${isUser ? 'bg-red-600 text-white rounded-br-none' : 'bg-gray-800 text-gray-200 border border-gray-700 rounded-bl-none'}`}>
+      <div className={`p-4 rounded-2xl ${isUser ? 'bg-orange-600 text-white rounded-br-none' : 'dark:bg-gray-800 text-black bg-gray-300 dark:text-gray-200 border border-gray-700 rounded-bl-none'}`}>
         <p className="leading-relaxed">{message.content}</p>
       </div>
 
