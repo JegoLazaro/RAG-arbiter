@@ -16,18 +16,20 @@ export async function POST(req: NextRequest) {
       };
 
       try {
-        sendStatus("Initializing clients...");
+        sendStatus("Initializing Arbiter Protocol...");
         const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
         const embeddingModel = genAI.getGenerativeModel({
           model: "gemini-embedding-001",
         });
+        
+        
         const chatModel = genAI.getGenerativeModel({
           model: "gemini-3-flash-preview",
         });
 
-        sendStatus("Vectorizing user query to 3,072 dimensions...");
+        sendStatus("Vectorizing query to 3,072 dimensions...");
         const embedRes = await embeddingModel.embedContent(latestMessage);
         const vector = embedRes.embedding.values;
 
@@ -35,31 +37,38 @@ export async function POST(req: NextRequest) {
         const index = pc.index({ name: process.env.PINECONE_INDEX_NAME! });
         const queryResponse = await index.query({
           vector: vector,
-          topK: 7,
+          topK: 10, 
           includeMetadata: true,
         });
 
         sendStatus(
-          `Retrieved ${queryResponse.matches.length} highly relevant lore chunks.`,
+          `Retrieved ${queryResponse.matches.length} historical and lore fragments.`
         );
 
         const sources = queryResponse.matches.map((match) => {
           let parsedCitations = {};
           if (match.metadata?.citations) {
             try {
-              parsedCitations = JSON.parse(match.metadata.citations as string);
+              parsedCitations = typeof match.metadata.citations === 'string' 
+                ? JSON.parse(match.metadata.citations) 
+                : match.metadata.citations;
             } catch (e) {
               console.warn("Failed to parse citations for match:", e);
             }
           }
+
+          // Dynamically identify if this is a Chapter Summary or a Character Profile
+          const isChapter = !!match.metadata?.chapter_number;
+          const sourceName = isChapter 
+            ? `Chapter ${match.metadata?.chapter_number}: ${match.metadata?.name}`
+            : (match.metadata?.character as string || "General Lore");
+
           return {
-            name:
-              match.metadata?.character ||
-              match.metadata?.source ||
-              "Unknown Source",
+            name: sourceName,
             text: match.metadata?.text as string,
             score: (match.score! * 100).toFixed(1),
             citations: parsedCitations,
+            type: isChapter ? "chronicle" : "lore"
           };
         });
 
@@ -71,14 +80,24 @@ export async function POST(req: NextRequest) {
 
         sendStatus("Synthesizing Arbiter verdict based on grounding data...");
         const prompt = `
-          You are the Anime Arbiter, an expert judge of fictional battles. 
-          FORMATTING RULES:
-          1. Use clear Markdown headers (e.g., ### The Meeting) for different sections.
-          2. Use bullet points for lists of facts.
-          3. Use double line breaks between paragraphs for readability.
-          4. BOLD key terms or character names.
+          You are the Anime Arbiter, the supreme historian of the Jujutsu Kaisen universe.
+          
+          You have access to two types of data:
+          1. LORE: Core character profiles and abilities.
+          2. CHRONICLES: Plot summaries of specific chapters.
 
-          LORE SNIPPETS:
+          FORMATTING RULES:
+          1. Use clear Markdown headers (### section) for different parts of the analysis.
+          2. Use bullet points for specific feats or facts.
+          3. Use double line breaks between paragraphs.
+          4. BOLD key terms, techniques, or character names.
+
+          STRICT INSTRUCTIONS:
+          - If a CHRONICLE describes an event that contradicts a general LORE snippet, prioritize the CHRONICLE (it represents the actual timeline).
+          - Always cite the chapter number clearly if the information comes from a Chronicle.
+          - If the user asks about a character not in the snippets, explicitly state that your "sacred texts" do not contain them.
+
+          GROUNDING DATA:
           ${loreContext}
           
           USER QUESTION:
@@ -87,7 +106,6 @@ export async function POST(req: NextRequest) {
 
         const result = await chatModel.generateContent(prompt);
 
-        // Send the final result object
         const finalPayload = JSON.stringify({
           type: "result",
           answer: result.response.text(),
@@ -98,11 +116,9 @@ export async function POST(req: NextRequest) {
         // Close the stream
         controller.close();
       } catch (error: any) {
-        console.error("API Error:", error.status);
-
-        // Safely parse the exact error from Gemini or Pinecone
-        let userFriendlyError = "Connection to Arbiter failed.";
-
+        console.error("API Error:", error?.status);
+        let userFriendlyError = error.message || "An anomaly disrupted the connection.";
+        
         if (error.status === 429) {
           userFriendlyError =
             "Rate Limit Exceeded. The Arbiter's cursed energy is depleted for today (Pinecone Quota Limit Exceeded).";
@@ -118,10 +134,6 @@ export async function POST(req: NextRequest) {
         // Send the error message through the stream so the frontend terminal sees it
         sendStatus(`Error: ${userFriendlyError}`);
         controller.close();
-
-        // console.error("API Error:", error);
-        // sendStatus("Error: Connection to Arbiter failed.");
-        // controller.close();
       }
     },
   });
