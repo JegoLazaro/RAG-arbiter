@@ -27,13 +27,21 @@ export default function ChatInput({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="E.g., How does Gojo's infinity work?"
-          className="w-full resize-none dark:bg-gray-800 bg-gray-400 dark:text-black text-gray-100 border border-gray-700 rounded-2xl pl-6 pr-14 py-4 focus:outline-none focus:border-orange-500 transition-colors overflow-y-auto"
+          className="w-full resize-none dark:bg-gray-800 bg-gray-400 text-black dark:text-gray-100 border border-gray-700 rounded-2xl pl-6 pr-14 py-4 focus:outline-none focus:border-orange-500 transition-colors overflow-y-auto"
           disabled={isLoading}
           rows={1}
           style={{ lineHeight: "1.5" }}
         />
         <button
           type="submit"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (!isLoading && input.trim()) {
+                onSubmit(e as unknown as React.FormEvent);
+              }
+            }
+          }}
           disabled={isLoading || !input.trim()}
           className="absolute right-2 p-2 bg-orange-500 hover:bg-orange-500 text-white rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
