@@ -196,7 +196,9 @@ def run_ingestion():
                 print(f"   ❌ Error on chunk {i}: {e}")
 
         if vectors_to_upload:
-            index.upsert(vectors=vectors_to_upload)
+            index.upsert(vectors=vectors_to_upload
+                        #  , namespace=UNIVERSE_NAME
+                         )
             print(f"   ✅ Uploaded {name} with {len(citation_map)} references mapped.")
             with open("processed_urls.txt", "a") as f:
                 f.write(url + "\n")

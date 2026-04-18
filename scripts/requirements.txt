@@ -4,3 +4,4 @@ langchain-text-splitters
 beautifulsoup4
 requests
 python-dotenv
+cloudscraper

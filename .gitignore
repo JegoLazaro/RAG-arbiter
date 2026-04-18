@@ -5,6 +5,7 @@
 
 # --- PYTHON SETTINGS ---
 __pycache__/
+delete_*.py
 *.py[cod]
 *$py.class
 .venv/
@@ -15,6 +16,7 @@ env/
 # --- PROJECT SPECIFIC ---
 # These are your local "To-Do" lists and progress trackers
 processed_urls.txt
+processed_*_urls.txt
 *_links.json
 
 # --- NEXT.JS / NODE (PREP FOR PHASE 5) ---
