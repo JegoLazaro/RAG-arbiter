@@ -1,7 +1,7 @@
-google-genai
-pinecone
-langchain-text-splitters
 beautifulsoup4
-requests
-python-dotenv
 cloudscraper
+google-genai
+langchain-text-splitters
+pinecone-client
+python-dotenv
+requests

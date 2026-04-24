@@ -16,6 +16,7 @@ env/
 # --- PROJECT SPECIFIC ---
 # These are your local "To-Do" lists and progress trackers
 processed_urls.txt
+*_processed_urls.txt
 processed_*_urls.txt
 *_links.json
 
