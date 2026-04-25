@@ -4,7 +4,22 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: NextRequest) {
   const { messages } = await req.json();
-  const latestMessage = messages[messages.length - 1].content;
+
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: "Invalid message payload." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const latestMessage = messages[messages.length - 1].content;
+    
+    if (!latestMessage || typeof latestMessage !== 'string') {
+        return new Response(JSON.stringify({ error: "Message content is missing." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
   // Create a stream to send data back to the frontend chunk-by-chunk
   const stream = new ReadableStream({
@@ -41,11 +56,18 @@ export async function POST(req: NextRequest) {
           includeMetadata: true,
         });
 
-        sendStatus(
-          `Retrieved ${queryResponse.matches.length} historical and lore fragments.`
-        );
+        // Filter matches below similarity score 0.75 based on a score threshold to ensure relevance
 
-        const sources = queryResponse.matches.map((match) => {
+        const SCORE_THRESHOLD = 0.75;
+          const validMatches = queryResponse.matches.filter(
+            match => match.score !== undefined && match.score > SCORE_THRESHOLD
+          );
+
+          sendStatus(
+            `Retrieved ${validMatches.length} highly relevant historical fragments (filtered from ${queryResponse.matches.length}).`
+          );
+
+        const sources = validMatches.map((match) => {
           let parsedCitations = {};
           if (match.metadata?.citations) {
             try {
