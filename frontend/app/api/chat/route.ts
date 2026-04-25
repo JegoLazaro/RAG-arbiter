@@ -56,11 +56,18 @@ export async function POST(req: NextRequest) {
           includeMetadata: true,
         });
 
-        sendStatus(
-          `Retrieved ${queryResponse.matches.length} historical and lore fragments.`
-        );
+        // Filter matches below similarity score 0.75 based on a score threshold to ensure relevance
 
-        const sources = queryResponse.matches.map((match) => {
+        const SCORE_THRESHOLD = 0.75;
+          const validMatches = queryResponse.matches.filter(
+            match => match.score !== undefined && match.score > SCORE_THRESHOLD
+          );
+
+          sendStatus(
+            `Retrieved ${validMatches.length} highly relevant historical fragments (filtered from ${queryResponse.matches.length}).`
+          );
+
+        const sources = validMatches.map((match) => {
           let parsedCitations = {};
           if (match.metadata?.citations) {
             try {
