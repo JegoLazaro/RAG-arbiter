@@ -4,7 +4,22 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: NextRequest) {
   const { messages } = await req.json();
-  const latestMessage = messages[messages.length - 1].content;
+
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: "Invalid message payload." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const latestMessage = messages[messages.length - 1].content;
+    
+    if (!latestMessage || typeof latestMessage !== 'string') {
+        return new Response(JSON.stringify({ error: "Message content is missing." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
   // Create a stream to send data back to the frontend chunk-by-chunk
   const stream = new ReadableStream({
