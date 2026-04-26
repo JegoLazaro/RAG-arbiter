@@ -1,4 +1,5 @@
 import { ShieldAlert, Sun, Moon } from "lucide-react";
+import { Show } from "@bluelens/nextjs-utils";
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -27,17 +28,19 @@ export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
           className="relative inline-flex h-8 w-16 items-center rounded-full bg-gray-300 dark:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
           aria-label="Toggle Dark Mode"
         >
-          {/* The sliding "thumb" */}
           <span
             className={`inline-flex h-6 w-6 transform items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-md transition-transform duration-300 ${
               isDarkMode ? "translate-x-9" : "translate-x-1"
             }`}
           >
-            {isDarkMode ? (
-              <Moon className="w-3.5 h-3.5 text-gray-200" />
-            ) : (
-              <Sun className="w-3.5 h-3.5 text-gray-300" />
-            )}
+            <Show>
+              <Show.When isTrue={isDarkMode}>
+                <Moon className="w-3.5 h-3.5 text-gray-200" />
+              </Show.When>
+              <Show.Else>
+                <Sun className="w-3.5 h-3.5 text-gray-300" />
+              </Show.Else>
+            </Show>
           </span>
         </button>
       </div>

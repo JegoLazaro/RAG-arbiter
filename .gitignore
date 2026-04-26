@@ -18,6 +18,7 @@ env/
 processed_urls.txt
 *_processed_urls.txt
 processed_*_urls.txt
+vuln.txt
 *_links.json
 
 # --- NEXT.JS / NODE (PREP FOR PHASE 5) ---
