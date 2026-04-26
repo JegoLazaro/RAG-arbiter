@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@bluelens/nextjs-utils": "^1.0.10",
     "ai": "^6.0.158",
     "lucide-react": "^1.8.0",
     "next": "16.2.3",

@@ -5,7 +5,7 @@ import Header from "../components/Header";
 import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
 import { Message } from "../types/chat";
-import Footer from "@/components/Footer";
+import { Each, Show } from "@bluelens/nextjs-utils";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
@@ -62,20 +62,26 @@ export default function Home() {
         const lines = chunk.split("\n").filter((line) => line.trim() !== "");
 
         for (const line of lines) {
-          // Wrap parsing in case the stream breaks
           let data;
           try {
             data = JSON.parse(line);
           } catch (err) {
-            continue; // Skip malformed JSON chunks
+            continue;
           }
 
           if (data.type === "status") {
             setLoadingLogs((prev) => [...prev, data.message]);
 
-            // Catch streamed errors from the backend route.ts
             if (data.message.toLowerCase().includes("error:")) {
-              throw new Error(data.message.replace(/error:\s*/i, ""));
+              const cleanError = data.message.replace(/error:\s/i, "");
+              setMessages((prev) => [
+                ...prev,
+                {
+                  role: "arbiter",
+                  content: `⚠️ **System Override:** ${cleanError}`,
+                },
+              ]);
+              break;
             }
           } else if (data.type === "result") {
             setMessages((prev) => [
@@ -132,31 +138,36 @@ export default function Home() {
 
       <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
         {messages.map((m, index) => (
-          <ChatMessage key={index} message={m}  />
+          <ChatMessage key={index} message={m} />
         ))}
 
-        {isLoading && (
-          <div className="mr-auto p-4 bg-gray-900 rounded-2xl rounded-bl-none border border-gray-700 max-w-sm text-gray-400 font-mono text-xs shadow-lg">
-            <div className="flex items-center gap-2 mb-2 text-purple-500 font-bold uppercase tracking-wider">
-              <span className="w-2 h-2 bg-purple-500 rounded-full animate-ping"></span>
-              System Terminal
+        <Show>
+          <Show.When isTrue={isLoading}>
+            <div className="mr-auto p-4 bg-gray-900 rounded-2xl rounded-bl-none border border-gray-700 max-w-sm text-gray-400 font-mono text-xs shadow-lg">
+              <div className="flex items-center gap-2 mb-2 text-purple-500 font-bold uppercase tracking-wider">
+                <span className="w-2 h-2 bg-purple-500 rounded-full animate-ping"></span>
+                System Terminal
+              </div>
+              <div className="space-y-1">
+                <Each
+                  of={loadingLogs}
+                  render={(log, i) => (
+                    <div
+                      key={i}
+                      className={
+                        i === loadingLogs.length - 1
+                          ? "text-gray-200"
+                          : "text-gray-500"
+                      }
+                    >
+                      <span className="text-gray-600 mr-2">{">"}</span> {log}
+                    </div>
+                  )}
+                />
+              </div>
             </div>
-            <div className="space-y-1">
-              {loadingLogs.map((log, i) => (
-                <div
-                  key={i}
-                  className={
-                    i === loadingLogs.length - 1
-                      ? "text-gray-200"
-                      : "text-gray-500"
-                  }
-                >
-                  <span className="text-gray-600 mr-2">{">"}</span> {log}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          </Show.When>
+        </Show>
       </div>
 
       <ChatInput
