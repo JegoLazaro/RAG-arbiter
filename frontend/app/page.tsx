@@ -12,7 +12,7 @@ export default function Home() {
     {
       role: "arbiter",
       content:
-        "Welcome to the VS Battle. Present your matchup or lore question, and I shall consult the sacred texts.",
+        `> Welcome to the VS Battle. Present your matchup or lore question, and I shall consult the sacred texts.`,
     },
   ]);
   const [input, setInput] = useState("");
