@@ -18,9 +18,10 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
-UNIVERSE_NAME = "Jujutsu Kaisen"
-JSON_FILE = "jujutsu_kaisen_links.json"
-WIKI_DOMAIN = "jujutsu-kaisen.fandom.com"
+UNIVERSE_NAME = "Demon Slayer"
+NAMESPACE_SLUG = "demon-slayer"
+JSON_FILE = "demon_slayer_links.json"
+WIKI_DOMAIN = "kimetsu-no-yaiba.fandom.com"
 
 if not GEMINI_API_KEY or not PINECONE_API_KEY:
     raise ValueError("Missing API Keys! Check your .env file.")
@@ -29,7 +30,7 @@ if not GEMINI_API_KEY or not PINECONE_API_KEY:
 # 2. DEFINE FUNCTIONS FIRST
 # ==========================================
 
-def get_embedding(text, retry_count=0):
+def get_embedding(text, name="", embeddings_count=0, retry_count=0):
     """Safely extracts the embedding vector from the Google GenAI SDK response."""
     client = genai.Client(api_key=GEMINI_API_KEY)
     try:
@@ -40,8 +41,10 @@ def get_embedding(text, retry_count=0):
         
         # 1. Access the first ContentEmbedding object in the list
         item = response.embeddings 
+        if not item:
+            raise ValueError(f"No embeddings found for [{name}]")
         
-        print(f"   🧠 Received embedding with {len(item)} dimensions.")
+        print(f"   🧠 Received embedding from [{name}] with {len(item)}/{embeddings_count} dimensions.")
         print(f"   Sample values: {item[:5]}")  # Print the first 5 values for verification
         
         # 2. Extract the actual list of numbers from the .values attribute
@@ -52,10 +55,10 @@ def get_embedding(text, retry_count=0):
     except Exception as e:
         # rate limit handler with exponential backoff
         if "429" in str(e) and retry_count < 5:
-            wait_time = (retry_count + 1) * 12  
-            print(f"   ⚠️ Rate limit hit. Sleeping {wait_time}s before retrying...")
+            wait_time = (retry_count + 1) * 20  
+            print(f"   ⚠️ [{retry_count}] Rate limit hit. Sleeping {wait_time}s before retrying...")
             time.sleep(wait_time)
-            return get_embedding(text, retry_count + 1)
+            return get_embedding(text, retry_count=retry_count + 1)
         else:
             print(f"   ❌ Critical Error: {e}")
             raise e
@@ -125,7 +128,7 @@ try:
     print(f"📊 Index Stats: {stats['total_vector_count']} vectors currently stored.")
     
     print("🧪 Testing Gemini embedding pipeline...")
-    test_vec = get_embedding("Test connection")
+    test_vec = get_embedding("Test connection", "Test Character")
     if len(test_vec) == 3072:
         print(f"✅ Gemini is outputting correct dimensions (3072).")
     else:
@@ -146,8 +149,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 def run_ingestion():
     processed_urls = set()
-    if os.path.exists("processed_urls.txt"):
-        with open("processed_urls.txt", "r") as f:
+    if os.path.exists("kny_processed_urls.txt"):
+        with open("kny_processed_urls.txt", "r") as f:
             processed_urls = set(line.strip() for line in f)
 
     with open(JSON_FILE, 'r', encoding='utf-8') as f:
@@ -165,7 +168,8 @@ def run_ingestion():
 
         print(f"📥 Processing {name} with Citations...")
         raw_text, citation_map = get_character_text_hybrid(name)
-        
+        # print(f"raw text: {raw_text} ")
+
         if not raw_text or len(raw_text.strip()) < 50:
             print(f"⚠️ No text for {name}.")
             continue
@@ -177,7 +181,7 @@ def run_ingestion():
             try:
                 relevant_citations = {k: v for k, v in citation_map.items() if k in chunk}
                 
-                vector_math = get_embedding(chunk)
+                vector_math = get_embedding(chunk, name, len(chunk))
                 
                 # UPDATED: Added extensible attributes dictionary
                 vectors_to_upload.append({
@@ -197,10 +201,10 @@ def run_ingestion():
 
         if vectors_to_upload:
             index.upsert(vectors=vectors_to_upload
-                        #  , namespace=UNIVERSE_NAME
+                         , namespace=NAMESPACE_SLUG
                          )
             print(f"   ✅ Uploaded {name} with {len(citation_map)} references mapped.")
-            with open("processed_urls.txt", "a") as f:
+            with open("kny_processed_urls.txt", "a") as f:
                 f.write(url + "\n")
         
         time.sleep(1)

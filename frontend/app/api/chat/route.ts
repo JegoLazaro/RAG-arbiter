@@ -1,8 +1,35 @@
 import { NextRequest } from "next/server";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const ratelimit = new Ratelimit({
+  redis: new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!
+  }),
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  analytics: true,
+});
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
+  const { success } = await ratelimit.limit(ip);
+
+  if (!success) {
+    // If req failed, immediately return a 429 and kill the request
+    return new Response(
+      JSON.stringify({
+        error:
+          "Rate Limit Exceeded. The Arbiter's cursed energy is depleted for you. Please wait 60 seconds.",
+      }),
+      {
+        status: 429,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
   const { messages } = await req.json();
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -60,7 +87,7 @@ export async function POST(req: NextRequest) {
             Available namespaces: 
             - "" (Use this empty string for Jujutsu Kaisen)
             - "my-hero-academia" (Use this for My Hero Academia)
-            - "demon-slayer" (Use this for Demon Slayer)
+            - "demon-slayer" (Use this for Demon Slayer / Kimetsu no Yaiba)
 
             Message: "${latestMessage}"
             
@@ -108,7 +135,6 @@ export async function POST(req: NextRequest) {
           let allMatches: any[] = [];
           // Filter matches below similarity score 0.60
           const SCORE_THRESHOLD = 0.6;
-          
           // get 5 from universe 1 and 5 from universe 2
           const limitPerUniverse = Math.floor(10 / namespaces.length);
           queryResponses.forEach((res) => {
@@ -123,8 +149,8 @@ export async function POST(req: NextRequest) {
                   res.requestedNamespace === "my-hero-academia"
                     ? "My Hero Academia"
                     : res.requestedNamespace === "demon-slayer"
-                    ? "Demon Slayer"
-                    : "Jujutsu Kaisen"
+                      ? "Demon Slayer"
+                      : "Jujutsu Kaisen",
               }));
 
             // Sort matches for THIS specific universe, and take the top chunks
@@ -189,6 +215,8 @@ export async function POST(req: NextRequest) {
           2. Use bullet points for specific feats or facts.
           3. Use double line breaks between paragraphs.
           4. BOLD key terms, techniques, or character names.
+          5. Use blockquotes for direct citations from the sources, and always include the source name and universe in the citation.
+          6. Use tables if comparing multiple characters or universes side by side.
 
           STRICT INSTRUCTIONS:
           - If a CHRONICLE describes an event that contradicts a general LORE snippet, prioritize the CHRONICLE (it represents the actual timeline).

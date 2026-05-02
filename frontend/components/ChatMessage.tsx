@@ -20,7 +20,7 @@ export default function ChatMessage({ message }: { message: Message }) {
     let currentIndex = 0;
     setDisplayedContent("");
 
-    const typingSpeed = 10;
+    const typingSpeed = 2;
     const intervalId = setInterval(() => {
       setDisplayedContent(message.content.slice(0, currentIndex + 1));
       currentIndex++;
@@ -68,6 +68,35 @@ export default function ChatMessage({ message }: { message: Message }) {
                   {...props}
                 />
               ),
+              blockquote: ({ ...props }) => (
+                <blockquote
+                  className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4 text-gray-700 dark:text-gray-300"
+                  {...props}
+                />
+              ),
+              table: ({ ...props }) => (
+                <div className="overflow-x-auto mb-4">
+                  <table
+                    className="min-w-full divide-y divide-gray-300 dark:divide-gray-700 border border-gray-200 dark:border-gray-800"
+                    {...props}
+                  />
+                </div>
+              ),
+              thead: ({ ...props }) => (
+                <thead className="bg-gray-50 dark:bg-gray-800" {...props} />
+              ),
+              th: ({ ...props }) => (
+                <th
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
+                  {...props}
+                />
+              ),
+              td: ({ ...props }) => (
+                <td
+                  className="whitespace-nowrap px-3 py-2 text-sm text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800"
+                  {...props}
+                />
+              ),
             }}
           >
             {displayedContent}
@@ -75,7 +104,7 @@ export default function ChatMessage({ message }: { message: Message }) {
         </div>
       </div>
 
-      {/* The Grounding Data Accordion */}
+      {/* Grounding Data Accordion */}
       {message.sources && message.sources.length > 0 && (
         <div className="mt-3 w-full max-w-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-md transition-colors duration-300">
           <div
@@ -92,7 +121,7 @@ export default function ChatMessage({ message }: { message: Message }) {
                 </Show.Else>
               </Show>
               <span>
-                Retrived Pinecone References ({message.sources.length} sources)
+                Retrieved Pinecone References ({message.sources.length} sources)
               </span>
             </div>
             <Show>
@@ -116,7 +145,7 @@ export default function ChatMessage({ message }: { message: Message }) {
                   return (
                     <div
                       key={i}
-                      className="text-sm border-l-2 border-orange-500 pl-3 py-1"
+                      className={`text-sm border-l-2 ${i < 5 ? "border-orange-500" : "border-amber-400"} pl-3 py-1`}
                     >
                       <div className="flex justify-between items-center text-xs mb-1.5">
                         <div className="flex gap-2 items-center">
