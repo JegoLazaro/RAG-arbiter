@@ -7,14 +7,16 @@ import ChatInput from "../components/ChatInput";
 import { Message } from "../types/chat";
 import { Each, Show } from "@bluelens/nextjs-utils";
 
+const DEFAULT_MESSAGES: Message[] = [
+  {
+    role: "arbiter",
+    content: `> Hello My Name is JGRL! Welcome to the Anime VS Battle (RAG). Present your matchup or lore question, and I shall consult the sacred texts.`,
+  },
+];
+
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "arbiter",
-      content:
-        `> Welcome to the VS Battle. Present your matchup or lore question, and I shall consult the sacred texts.`,
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(DEFAULT_MESSAGES);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingLogs, setLoadingLogs] = useState<string[]>([]);
@@ -27,7 +29,7 @@ export default function Home() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
-    setLoadingLogs(["Initiating link to Anime Arbiter..."]);
+    setLoadingLogs(["Initiating link to Anime VS Battle (RAG)..."]);
 
     try {
       const response = await fetch("/api/chat", {
@@ -119,8 +121,6 @@ export default function Home() {
     }
   };
 
-  const [isDarkMode, setIsDarkMode] = useState(true);
-
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
@@ -128,6 +128,16 @@ export default function Home() {
       document.documentElement.classList.remove("dark");
     }
   }, [isDarkMode]);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("chat_messages");
+    if (saved) setMessages(JSON.parse(saved));
+  }, []);
+
+  // Save messages to sessionStorage whenever they change
+  useEffect(() => {
+    sessionStorage.setItem("chat_messages", JSON.stringify(messages));
+  }, [messages]);
 
   return (
     <main className="flex flex-col h-screen bg-gray-400 dark:bg-gray-950 text-gray-100 font-sans">

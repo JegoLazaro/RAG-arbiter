@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
             : "";
 
         const routerPrompt = `
-            Analyze the following user message. Consider the entire conversation history for context, but focus primarily on the latest message.
+            Your Name is JGRL. Analyze the following user message. Consider the entire conversation history for context, but focus primarily on the latest message.
 
             TASK 1: Determine if the message requires looking up specific facts, lore, or plot details from an anime.
             TASK 2: Which specific anime universes are mentioned or implied? 
@@ -245,7 +245,7 @@ export async function POST(req: NextRequest) {
           sendStatus("Synthesizing Arbiter verdict based on grounding data...");
 
           finalPrompt = `
-          You are the Anime Arbiter, the supreme historian of the Anime Multiverse.
+          You are the Anime Arbiter and your name is JGRL, the supreme historian of the Anime Multiverse. Your main function is to provide accurate, concise, and well-reasoned answers to user questions about anime characters, their abilities, and plot events. You draw your knowledge from the sacred texts of LORE (core character profiles) and CHRONICLES (specific plot summaries). You have knowledge within the universes of Jujutsu Kaisen, My Hero Academia, and Demon Slayer.
           
           You have access to two types of data:
           1. LORE: Core character profiles and abilities.
@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
           - If a CHRONICLE describes an event that contradicts a general LORE snippet, prioritize the CHRONICLE (it represents the actual timeline).
           - Always cite the chapter number clearly if the information comes from a Chronicle.
           - If the user asks about a character not in the snippets, explicitly state that your "sacred texts" do not contain them.
-          - If evaluating a cross-universe battle, objectively compare their feats based ONLY on the provided grounding data.
+          - If evaluating a cross-universe battle, objectively compare their feats based ONLY on the provided grounding data. Make sure to state who has the advantage and why, based on specific feats or facts from the sources.
 
           GROUNDING DATA:
           ${loreContext}
@@ -274,7 +274,7 @@ export async function POST(req: NextRequest) {
         } else {
           sendStatus("General inquiry detected. Bypassing databanks...");
           finalPrompt = `
-              You are the Anime Arbiter. The user just asked a general, conversational, or off-topic question that does NOT require anime lore.
+              You are the Anime Arbiter and your name is JGRL. The user just asked a general, conversational, or off-topic question that does NOT require anime lore.
               Answer their question naturally, but strictly maintain your persona as an all-knowing historian of cursed energy and quirks.
               Keep your answer brief, solve their problem, and invite them to ask a lore-specific question when you are done.
 

@@ -1,3 +1,4 @@
+import { Tooltip } from "@mui/material";
 import { Send } from "lucide-react";
 
 interface ChatInputProps {
@@ -40,13 +41,26 @@ export default function ChatInput({
           rows={1}
           style={{ lineHeight: "1.5" }}
         />
-        <button
-          type="submit"
-          disabled={isLoading || !input.trim()}
-          className="absolute right-2 p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed"
+        <Tooltip
+          title={
+            isLoading
+              ? "Please wait for the current response to finish"
+              : !input.trim()
+                ? "Please enter a message to send"
+                : "Send"
+          }
+          placement="top"
         >
-          <Send className="w-5 h-5" />
-        </button>
+          <span className="absolute right-2 p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="flex items-center justify-center"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </span>
+        </Tooltip>
       </form>
     </div>
   );
