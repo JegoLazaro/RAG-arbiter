@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
 import { Message } from "../types/chat";
@@ -188,7 +189,7 @@ export default function Home() {
         onSubmit={handleSubmit}
         isLoading={isLoading}
       />
-      {/* <Footer /> */}
+      <Footer />
     </main>
   );
 }
