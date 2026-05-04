@@ -7,7 +7,7 @@ import { Redis } from "@upstash/redis";
 const ratelimit = new Ratelimit({
   redis: new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
   }),
   limiter: Ratelimit.slidingWindow(10, "1 m"),
   analytics: true,
@@ -79,38 +79,79 @@ export async function POST(req: NextRequest) {
         });
 
         sendStatus("Analyzing query intent...");
+
+        const historyString =
+          messages.length > 1
+            ? messages
+                .slice(0, -1)
+                .map((m: any) => `${m.role.toUpperCase()}: ${m.content}`)
+                .join("\n")
+            : "";
+
         const routerPrompt = `
-            Analyze the following user message. 
-            1. Does it require looking up specific facts, lore, or plot details from an anime?
-            2. Which specific anime universes are mentioned or implied? 
+            Analyze the following user message. Consider the entire conversation history for context, but focus primarily on the latest message.
+
+            TASK 1: Determine if the message requires looking up specific facts, lore, or plot details from an anime.
+            TASK 2: Which specific anime universes are mentioned or implied? 
+            TASK 3: Rewrite the latest message into a standalone search query. Replace pronouns (he, him, his, it, that fight) with actual character names or context from the HISTORY. If no context is needed, return the original message.
             
             Available namespaces: 
             - "" (Use this empty string for Jujutsu Kaisen)
             - "my-hero-academia" (Use this for My Hero Academia)
             - "demon-slayer" (Use this for Demon Slayer / Kimetsu no Yaiba)
 
+            HISTORY:
+            ${historyString}
+
             Message: "${latestMessage}"
             
-            Return ONLY a raw JSON object with a boolean "requires_lore" and an array of strings "namespaces".
-            Example 1 (JJK only): {"requires_lore": true, "namespaces": [""]}
-            Example 2 (MHA only): {"requires_lore": true, "namespaces": ["my-hero-academia"]}
-            Example 3 (DS only): {"requires_lore": true, "namespaces": ["demon-slayer"]}
-            Example 4.a (Crossover): {"requires_lore": true, "namespaces": ["", "my-hero-academia"]}
-            Example 4.b (Crossover): {"requires_lore": true, "namespaces": ["", "demon-slayer"]}
-            Example 4.c (Crossover): {"requires_lore": true, "namespaces": ["my-hero-academia", "demon-slayer"]}
-            Example 5 (Math/Off-topic): {"requires_lore": false, "namespaces": []}
+            Return ONLY a raw JSON object with:
+            - "requires_lore" (boolean)
+            - "namespaces" (array of strings)
+            - "search_query" (string - the dynamically generated standalone question)
+
+            EXAMPLES OF EXPECTED BEHAVIOR:
+            
+            [Context: History is about Satoru Gojo]
+            User: "What is his domain?"
+            Output: {"requires_lore": true, "namespaces": [""], "search_query": "What is Satoru Gojo's domain?"}
+
+            [Context: No history needed]
+            User: "How does One For All work?"
+            Output: {"requires_lore": true, "namespaces": ["my-hero-academia"], "search_query": "How does One For All work?"}
+
+            [Context: History is about Yuji]
+            User: "Who is faster, him or Tanjiro?"
+            Output: {"requires_lore": true, "namespaces": ["", "demon-slayer"], "search_query": "Who is faster, Yuji Itadori or Tanjiro Kamado?"}
+
+            [Context: General chat]
+            User: "Hello!"
+            Output: {"requires_lore": false, "namespaces": [], "search_query": "Hello!"}
+
+            Example 1 (JJK only): {"requires_lore": true, "namespaces": [""], "search_query": "What is Satoru Gojo's domain?"}
+            Example 2 (MHA only): {"requires_lore": true, "namespaces": ["my-hero-academia"], "search_query": "How does One For All work?"}
+            Example 3 (DS only): {"requires_lore": true, "namespaces": ["demon-slayer"], "search_query": "Who is faster, Yuji Itadori or Tanjiro Kamado?"}
+            Example 4.a (Crossover): {"requires_lore": true, "namespaces": ["", "my-hero-academia"], "search_query": "What is Satoru Gojo's domain?"}
+            Example 4.b (Crossover): {"requires_lore": true, "namespaces": ["", "demon-slayer"], "search_query": "Who is faster, Yuji Itadori or Tanjiro Kamado?"}
+            Example 4.c (Crossover): {"requires_lore": true, "namespaces": ["my-hero-academia", "demon-slayer"], "search_query": "Who is faster, Yuji Itadori or Tanjiro Kamado?"}
+            Example 5 (Math/Off-topic): {"requires_lore": false, "namespaces": [], "search_query": "Hello!"}
           `;
 
         const routerResult = await routerModel.generateContent(routerPrompt);
-        const { requires_lore, namespaces } = JSON.parse(
+        const { requires_lore, namespaces, search_query } = JSON.parse(
           routerResult.response.text(),
         );
 
         let finalPrompt = "";
         let finalSources: any[] = [];
         if (requires_lore) {
-          sendStatus("Vectorizing query to 3,072 dimensions...");
-          const embedRes = await embeddingModel.embedContent(latestMessage);
+          const safeQuery = search_query || latestMessage;
+          historyString.length > 0
+            ? sendStatus(
+                `Memory accessed. Vectorizing query: "${safeQuery}"...`,
+              )
+            : sendStatus("Vectorizing query to 3,072 dimensions...");
+          const embedRes = await embeddingModel.embedContent(safeQuery);
           const vector = embedRes.embedding.values;
 
           sendStatus(`Querying Pinecone index for relevant lore...`);
