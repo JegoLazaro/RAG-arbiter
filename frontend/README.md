@@ -1,6 +1,6 @@
 # ⛩️ The Anime Arbiter: Multiverse RAG AI
 
-The Anime Arbiter is a production-grade, streaming AI chat application powered by Retrieval-Augmented Generation (RAG). It acts as an omniscient historian, capable of retrieving highly specific lore, character feats, and chronological events across multiple anime universes (e.g., *Jujutsu Kaisen*, *Demon Slayer*, *My Hero Academia*). 
+The Anime Arbiter is a production-grade, streaming AI chat application powered by Retrieval-Augmented Generation (RAG). It acts as an omniscient historian, capable of retrieving highly specific lore, character feats, and chronological events across multiple anime universes (e.g., *Jujutsu Kaisen*, *Demon Slayer*, *My Hero Academia*, *Demon Slayer - Kimetsu No Yaiba*). 
 
 Built with **Next.js**, **Google Gemini**, and **Pinecone**, the system features a custom two-step LLM routing architecture, conversational memory, and robust endpoint protection via **Upstash Redis**.
 

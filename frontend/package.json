@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@bluelens/nextjs-utils": "^1.0.10",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@google/generative-ai": "^0.24.1",
+    "@mui/material": "^9.0.0",
     "@pinecone-database/pinecone": "^7.2.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
