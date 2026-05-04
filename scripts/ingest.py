@@ -44,7 +44,7 @@ def get_embedding(text, name="", embeddings_count=0, retry_count=0):
         if not item:
             raise ValueError(f"No embeddings found for [{name}]")
         
-        print(f"   🧠 Received embedding from [{name}] with {len(item)}/{embeddings_count} dimensions.")
+        print(f"   🧠 Received embedding from [{name}]. #{embeddings_count} embedding.")
         print(f"   Sample values: {item[:5]}")  # Print the first 5 values for verification
         
         # 2. Extract the actual list of numbers from the .values attribute
@@ -166,7 +166,7 @@ def run_ingestion():
             print(f"⏭️ Skipping {name}")
             continue
 
-        print(f"📥 Processing {name} with Citations...")
+        print(f"📥 Processing {name}...")
         raw_text, citation_map = get_character_text_hybrid(name)
         # print(f"raw text: {raw_text} ")
 
@@ -181,7 +181,7 @@ def run_ingestion():
             try:
                 relevant_citations = {k: v for k, v in citation_map.items() if k in chunk}
                 
-                vector_math = get_embedding(chunk, name, len(chunk))
+                vector_math = get_embedding(chunk, name, i+1)
                 
                 # UPDATED: Added extensible attributes dictionary
                 vectors_to_upload.append({
@@ -203,7 +203,7 @@ def run_ingestion():
             index.upsert(vectors=vectors_to_upload
                          , namespace=NAMESPACE_SLUG
                          )
-            print(f"   ✅ Uploaded {name} with {len(citation_map)} references mapped.")
+            print(f"   ✅ Uploaded {name} with {len(citation_map)} references mapped. Number of embeddings: {len(vectors_to_upload)}")
             with open("kny_processed_urls.txt", "a") as f:
                 f.write(url + "\n")
         

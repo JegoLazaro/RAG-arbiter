@@ -1,14 +1,14 @@
-import nextJest from "next/jest.js";
-
+import nextJest from 'next/jest.js'
+ 
 const createJestConfig = nextJest({
-  dir: "./",
-});
-
+  // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
+  dir: './',
+})
+ 
+/** @type {import('jest').Config} */
 const config = {
-  // Simulates a fake web browser environment in your terminal so we can test React UI
-  testEnvironment: "jest-environment-jsdom",
-  // Loads our custom testing commands before each test runs
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-};
-
-export default createJestConfig(config);
+  testEnvironment: 'jest-environment-jsdom',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+}
+ 
+export default createJestConfig(config)
