@@ -18,7 +18,7 @@ export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
     <header className="p-5 border-b border-gray-200 dark:border-gray-800 bg-gray-300 dark:bg-gray-900 shadow-md flex items-center justify-between transition-colors duration-300">
       <div className="flex items-center gap-3">
         <ShieldAlert className="text-orange-700 w-8 h-8 dark:text-orange-500" />
-        <h1 className="text-2xl font-bold tracking-wider text-orange-700 dark:text-orange-500">
+        <h1 className="text-2xl font-mono font-bold tracking-wider text-orange-700 dark:text-orange-500">
           JGRL Anime VS Battle (RAG)
         </h1>
       </div>
