@@ -11,7 +11,7 @@ import { Each, Show } from "@bluelens/nextjs-utils";
 const DEFAULT_MESSAGES: Message[] = [
   {
     role: "arbiter",
-    content: `> Hello My Name is JGRL! Welcome to the Anime VS Battle (RAG). Present your matchup or lore question, and I shall consult the sacred texts.`,
+    content: `> Hello My Name is JGRL! Welcome to the Anime VS Battle (RAG). Present your dream matchup or lore question from JJK, MHA and Demon Slayer, and I shall consult the sacred texts.`,
   },
 ];
 

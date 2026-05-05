@@ -135,7 +135,7 @@ const TECH_ITEMS = [
 
 const Footer = () => {
   return (
-    <footer className="w-screen bg-gray-800 p-4 text-gray-500 text-xs font-mono overflow-hidden">
+    <footer className="w-screen bg-gray-700/50 p-4 text-gray-500 text-xs font-mono overflow-hidden">
       <h2 className="text-center font-mono uppercase mb-2 text-sm font-semibold text-gray-400">
         Built using
       </h2>
@@ -161,7 +161,7 @@ const Footer = () => {
           {TECH_ITEMS.map((item) => (
             <span
               key={item.id}
-              className="flex items-center gap-1 cursor-pointer transition-all duration-200 ease-out hover:scale-[1.3] hover:z-10 hover:text-gray-900 group-hover:opacity-30 hover:!opacity-100 hover:drop-shadow-md origin-center"
+              className="flex items-center gap-1 cursor-pointer transition-all duration-200 ease-out hover:scale-[1.3] hover:z-10 hover:text-gray-100 group-hover:opacity-30 hover:opacity-100! hover:drop-shadow-md origin-center"
             >
               {item.content}
             </span>
@@ -182,35 +182,39 @@ const Footer = () => {
           ))}
         </div>
       </div>
-      <div className="flex justify-between mx-5 my-3 items-center text-center text-xs text-gray-400">
+      <div className="flex justify-between mx-5 px-10 my-3 items-center text-center text-xs text-gray-400">
         <span className="mr-2 flex items-center gap-1">
           <Copyright className="w-3 h-3" /> {new Date().getFullYear()} Jego
           Lazaro
         </span>
-        <div className="flex flex-row items-center gap-4 justify-center">
+        <div className="flex flex-row items-center gap-2 justify-center">
           <Tooltip title="Jego Lazaro Portfolio Website" placement="top">
             <span className="flex cursor-pointer justify-center items-center gap-1">
-              <Computer className="w-3 h-3" />{" "}
               <a
-                href="https://www.jegolazaro.vercel.app/"
+                href="https://jegolazaro.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline"
               >
-                {/* JGRL.dev */}
+                <img
+                  src="/logo_name.png"
+                  className="h-5 w-fit object-contain"
+                  alt="Jego Lazaro Portfolio logo"
+                />{" "}
               </a>
             </span>
           </Tooltip>
           <span>
-            <Linkedin className="w-3 h-3" />{" "}
-            {/* <a
-            href="https://www.linkedin.com/in/jego-lazaro/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
-          >
-            LinkedIn
-          </a> */}
+            <Tooltip title="Jego Lazaro LinkedIn Profile" placement="top">
+            <a
+              href="https://www.linkedin.com/in/jose-gabriel-lazaro-b842a8277/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
+              <Linkedin className="w-3 h-3" />
+            </a>
+            </Tooltip>
           </span>
         </div>
       </div>
