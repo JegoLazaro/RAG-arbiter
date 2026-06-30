@@ -91,9 +91,10 @@ UPSTASH_REDIS_REST_TOKEN="your_upstash_token"
 
 ### 4. Run the Development Server
 ```bash
-npm run dev
+cd frontend
+```
+```bash
+npm start
 ```
 Open [http://localhost:3000](http://localhost:3000) to interact with the Arbiter.
 ```
-
-How does that look? It highlights the sheer amount of logic you implemented perfectly. Let me know if you want to tweak any sections, or if you are ready to prepare this for Vercel!
