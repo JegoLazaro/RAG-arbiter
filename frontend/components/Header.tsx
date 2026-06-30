@@ -5,13 +5,13 @@ import { Tooltip } from "@mui/material";
 interface HeaderProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
+  onClearChat: () => void;
 }
 
-export default function Header({ isDarkMode, toggleTheme }: HeaderProps) {
+export default function Header({ isDarkMode, toggleTheme, onClearChat }: HeaderProps) {
 
   const handleClearChat = () => {
-    localStorage.removeItem("chat_messages");
-    window.location.reload(); // Optionally reload to reflect the cleared state
+    onClearChat();
   };
 
   return (
